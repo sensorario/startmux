@@ -21,9 +21,10 @@ fi
 
 
 echo "${information}Retrieving local information ...${reset}"
-`ls *.startmux` | grep cannot &> /dev/null
-if [ $? == 1 ]; then
-    echo "${alert}There are not configuration files in $PWD folder${reset}"
+if [[ -n $(ls *.startmux) ]]; then
+    echo "${information}Configuration files found${reset}"
+else
+    echo "${alert}No configuration available in folder $PWD${reset}"
     exit
 fi
 
@@ -44,18 +45,41 @@ do
 done
 
 
-tmux start-server
-windownumber=0
-for window in ${!combo[@]}; do
-    name=${window}
-    command=${combo[$window]}
-    if [ $((windownumber)) == 0 ]; then
-        tmux new-session -d -s startmux -n "${name}"
-    else
-        tmux new-window -tstartmux:$windownumber -n "${name}"
-    fi
-    tmux send-keys -tstartmux:$windownumber "${command}" C-m
-    ((windownumber++))
-done
-tmux select-window -tstartmux:0
-tmux attach-session -d -tstartmux
+declare -A combo=()
+
+add_window() {
+    local command=$1
+    name[$command]=2
+}
+
+while IFS= read -r line; do
+    case "$line" in
+        command=*)
+            # IFS== read -r __ _command <<< "$line"
+            _command=${line#*=}
+            ;;
+        name=*)
+            # IFS== read -r __ _name <<< "$line"
+            _name=${line#*=}
+            add_window "$_command" "$_name"
+            ;;
+    esac
+done < "$filename"
+
+
+
+# tmux start-server
+# windownumber=0
+# for window in ${!combo[@]}; do
+#     name=${window}
+#     command=${combo[$window]}
+#     if [ $((windownumber)) == 0 ]; then
+#         tmux new-session -d -s startmux -n "${name}"
+#     else
+#         tmux new-window -tstartmux:$windownumber -n "${name}"
+#     fi
+#     tmux send-keys -tstartmux:$windownumber "${command}" C-m
+#     ((windownumber++))
+# done
+# tmux select-window -tstartmux:0
+# tmux attach-session -d -tstartmux
