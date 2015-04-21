@@ -21,9 +21,10 @@ fi
 
 
 echo "${information}Retrieving local information ...${reset}"
-`ls *.startmux` | grep cannot &> /dev/null
-if [ $? == 1 ]; then
-    echo "${alert}There are not configuration files in $PWD folder${reset}"
+if [[ -n $(ls *.startmux) ]]; then
+    echo "${information}Configuration files found${reset}"
+else
+    echo "${alert}No configuration available in folder $PWD${reset}"
     exit
 fi
 
@@ -51,17 +52,19 @@ add_window() {
     name[$command]=2
 }
 
-while IFS=read -r line; do
+while IFS= read -r line; do
     case "$line" in
         command=*)
+            # IFS== read -r __ _command <<< "$line"
             _command=${line#*=}
             ;;
         name=*)
+            # IFS== read -r __ _name <<< "$line"
             _name=${line#*=}
             add_window "$_command" "$_name"
             ;;
     esac
-done < $filename
+done < "$filename"
 
 
 
