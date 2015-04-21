@@ -44,18 +44,39 @@ do
 done
 
 
-tmux start-server
-windownumber=0
-for window in ${!combo[@]}; do
-    name=${window}
-    command=${combo[$window]}
-    if [ $((windownumber)) == 0 ]; then
-        tmux new-session -d -s startmux -n "${name}"
-    else
-        tmux new-window -tstartmux:$windownumber -n "${name}"
-    fi
-    tmux send-keys -tstartmux:$windownumber "${command}" C-m
-    ((windownumber++))
-done
-tmux select-window -tstartmux:0
-tmux attach-session -d -tstartmux
+declare -A combo=()
+
+add_window() {
+    local command=$1
+    name[$command]=2
+}
+
+while IFS=read -r line; do
+    case "$line" in
+        command=*)
+            _command=${line#*=}
+            ;;
+        name=*)
+            _name=${line#*=}
+            add_window "$_command" "$_name"
+            ;;
+    esac
+done < $filename
+
+
+
+# tmux start-server
+# windownumber=0
+# for window in ${!combo[@]}; do
+#     name=${window}
+#     command=${combo[$window]}
+#     if [ $((windownumber)) == 0 ]; then
+#         tmux new-session -d -s startmux -n "${name}"
+#     else
+#         tmux new-window -tstartmux:$windownumber -n "${name}"
+#     fi
+#     tmux send-keys -tstartmux:$windownumber "${command}" C-m
+#     ((windownumber++))
+# done
+# tmux select-window -tstartmux:0
+# tmux attach-session -d -tstartmux

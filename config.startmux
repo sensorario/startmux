@@ -1,8 +1,7 @@
-#!/bin/bash
+[logs]
+position='/var/log'
+name=logs
 
-echo ""
-echo "You are loading default configuration"
-
-declare -A combo=()
-combo+=(['logs']='cd /var/log; clear; pwd')
-combo+=(['home']='cd ~; clear; pwd')
+[home]
+position='~'
+name=home
